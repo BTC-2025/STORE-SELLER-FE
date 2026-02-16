@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaArrowLeft, FaExclamationTriangle, FaFilter, FaTimes } from 'react-icons/fa';
 import './ComplaintsManagement.css';
 
-const ComplaintsManagement = ({ sellerToken, sellerId, onBackToDashboard }) => {
+const ComplaintsManagement = () => {
+  const navigate = useNavigate();
+  const { sellerToken, sellerData } = useOutletContext();
+  const sellerId = sellerData?.id; // Derived from context
   const [complaintsOnUs, setComplaintsOnUs] = useState([]);
   const [complaintsByUs, setComplaintsByUs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -222,7 +226,7 @@ const ComplaintsManagement = ({ sellerToken, sellerId, onBackToDashboard }) => {
     return (
       <div className="complaints-error">
         <p>Error: {error}</p>
-        <button onClick={onBackToDashboard}>Back to Dashboard</button>
+        <button onClick={() => navigate('/seller')}>Back to Dashboard</button>
       </div>
     );
   }
@@ -230,7 +234,7 @@ const ComplaintsManagement = ({ sellerToken, sellerId, onBackToDashboard }) => {
   return (
     <div className="complaints-management-container">
       <div className="complaints-header">
-        <button className="btn-back" onClick={onBackToDashboard}>
+        <button className="btn-back" onClick={() => navigate('/seller')}>
           <FaArrowLeft /> Back to Dashboard
         </button>
         <h2>Complaints Management</h2>

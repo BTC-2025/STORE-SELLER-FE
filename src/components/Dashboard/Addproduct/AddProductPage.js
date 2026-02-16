@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaTag, FaBoxOpen, FaImage, FaListUl, FaCheck } from 'react-icons/fa';
 import './AddProductPage.css';
 
-const AddProductPage = ({ sellerToken, onBackToDashboard }) => {
+const AddProductPage = () => {
+  const navigate = useNavigate();
+  const { sellerToken } = useOutletContext();
   const [brands, setBrands] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState('');
   const [loading, setLoading] = useState(false);
@@ -110,7 +113,7 @@ const AddProductPage = ({ sellerToken, onBackToDashboard }) => {
         throw new Error('Failed to add product');
       }
 
-      onBackToDashboard();
+      navigate('/seller/products');
     } catch (error) {
       console.error('Error adding product:', error);
       alert('Failed to add product. Please check fields.');
@@ -133,7 +136,7 @@ const AddProductPage = ({ sellerToken, onBackToDashboard }) => {
       <div className="ap-container">
         {/* Header */}
         <div className="ap-header">
-          <button className="ap-back-link" onClick={onBackToDashboard}>
+          <button className="ap-back-link" onClick={() => navigate('/seller')}>
             <FaArrowLeft /> Back to Dashboard
           </button>
           <div className="ap-header-content">
@@ -142,7 +145,7 @@ const AddProductPage = ({ sellerToken, onBackToDashboard }) => {
               <p className="ap-subtitle">Fill in the details to list your product</p>
             </div>
             <div className="ap-header-actions">
-              <button className="ap-btn-secondary" onClick={onBackToDashboard}>Cancel</button>
+              <button className="ap-btn-secondary" onClick={() => navigate('/seller')}>Cancel</button>
               <button className="ap-btn-primary" onClick={handleAddProduct} disabled={loading}>
                 {loading ? 'Saving...' : 'Publish Product'}
               </button>
@@ -155,7 +158,7 @@ const AddProductPage = ({ sellerToken, onBackToDashboard }) => {
             <div className="ap-empty-icon"><FaTag /></div>
             <h3>No Brands Found</h3>
             <p>You need to create a brand before adding products.</p>
-            <button className="ap-btn-primary" onClick={onBackToDashboard}>Go to Brands</button>
+            <button className="ap-btn-primary" onClick={() => navigate('/seller/create-brand')}>Go to Brands</button>
           </div>
         ) : (
           <form className="ap-grid" onSubmit={handleAddProduct}>

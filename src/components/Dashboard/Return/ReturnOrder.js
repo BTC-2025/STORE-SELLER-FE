@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import {
   FaArrowLeft,
   FaUndo,
@@ -18,7 +19,9 @@ const COMPLAINT_TYPES = [
   "Other",
 ];
 
-const ReturnOrder = ({ onBackToDashboard }) => {
+const ReturnOrder = () => {
+  const navigate = useNavigate();
+  const { sellerData } = useOutletContext();
   const [returnItems, setReturnItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showComplaintForm, setShowComplaintForm] = useState(false);
@@ -28,9 +31,8 @@ const ReturnOrder = ({ onBackToDashboard }) => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const sellerData = JSON.parse(localStorage.getItem("sellerData"));
     if (!sellerData || !sellerData.id) {
-      console.error("Seller ID not found in localStorage");
+      console.error("Seller ID not found");
       setLoading(false);
       return;
     }
@@ -55,7 +57,7 @@ const ReturnOrder = ({ onBackToDashboard }) => {
     };
 
     fetchReturns();
-  }, []);
+  }, [sellerData]);
 
   const handleRaiseComplaint = (item) => {
     setSelectedItem(item);
@@ -67,7 +69,8 @@ const ReturnOrder = ({ onBackToDashboard }) => {
   const submitComplaint = async () => {
     if (!selectedItem) return;
 
-    const sellerData = JSON.parse(localStorage.getItem("sellerData"));
+    // Use sellerData from context instead of localStorage
+    // const sellerData = JSON.parse(localStorage.getItem("sellerData"));
 
     // Structure payload based on the return item data
     // selectedItem is the Return object including OrderItem and Product
@@ -144,7 +147,7 @@ const ReturnOrder = ({ onBackToDashboard }) => {
     <div className="ro-page">
       <div className="ro-container">
         <header className="ro-header">
-          <button className="ro-back-btn" onClick={onBackToDashboard}>
+          <button className="ro-back-btn" onClick={() => navigate('/seller')}>
             <FaArrowLeft /> Back to Dashboard
           </button>
           <div className="ro-title-section">

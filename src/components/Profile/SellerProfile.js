@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import './SellerProfile.css';
-import { FaUser, FaEnvelope, FaPhone, FaStore, FaFileInvoiceDollar, 
-         FaMapMarkerAlt, FaCity, FaGlobe, FaMailBulk, FaUniversity, 
-         FaCreditCard, FaCheckCircle, FaTimesCircle, FaEdit } from 'react-icons/fa';
+import {
+  FaUser, FaEnvelope, FaPhone, FaStore, FaFileInvoiceDollar,
+  FaMapMarkerAlt, FaCity, FaGlobe, FaMailBulk, FaUniversity,
+  FaCreditCard, FaCheckCircle, FaTimesCircle, FaEdit
+} from 'react-icons/fa';
 
-const SellerProfile = ({ sellerToken, onBackToDashboard }) => {
+const SellerProfile = () => {
+  const navigate = useNavigate();
+  const { sellerToken } = useOutletContext();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,11 +22,11 @@ const SellerProfile = ({ sellerToken, onBackToDashboard }) => {
             'Authorization': `Bearer ${sellerToken}`
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch profile data');
         }
-        
+
         const data = await response.json();
         setProfileData(data);
         setLoading(false);
@@ -49,7 +54,7 @@ const SellerProfile = ({ sellerToken, onBackToDashboard }) => {
       <div className="profile-error">
         <h3>Error Loading Profile</h3>
         <p>{error}</p>
-        <button onClick={onBackToDashboard}>Back to Dashboard</button>
+        <button onClick={() => navigate('/seller')}>Back to Dashboard</button>
       </div>
     );
   }
@@ -59,7 +64,7 @@ const SellerProfile = ({ sellerToken, onBackToDashboard }) => {
       <div className="profile-error">
         <h3>No Profile Data</h3>
         <p>Unable to load profile information.</p>
-        <button onClick={onBackToDashboard}>Back to Dashboard</button>
+        <button onClick={() => navigate('/seller')}>Back to Dashboard</button>
       </div>
     );
   }
@@ -67,7 +72,7 @@ const SellerProfile = ({ sellerToken, onBackToDashboard }) => {
   return (
     <div className="seller-profile">
       <div className="profile-header">
-        <button className="btn-back" onClick={onBackToDashboard}>
+        <button className="btn-back" onClick={() => navigate('/seller')}>
           &larr; Back to Dashboard
         </button>
         <h1>Seller Profile</h1>

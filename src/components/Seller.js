@@ -1,32 +1,26 @@
 import React, { useState, useEffect } from "react";
-import Dashboard from "./Dashboard/Dashboard";
-import Login from "./Login/Login";
-import Register from "./Register/Register";
+import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 
 const Seller = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Load from localStorage on first render
   const [sellerToken, setSellerToken] = useState(localStorage.getItem("sellerToken"));
   const [sellerData, setSellerData] = useState(
     JSON.parse(localStorage.getItem("sellerData")) || null
   );
 
-  const [showRegister, setShowRegister] = useState(false);
-
   // Persist state changes into localStorage
   useEffect(() => {
     if (sellerToken && sellerData) {
       localStorage.setItem("sellerToken", sellerToken);
       localStorage.setItem("sellerData", JSON.stringify(sellerData));
+    } else if (!sellerToken) {
+      localStorage.removeItem("sellerToken");
+      localStorage.removeItem("sellerData");
     }
   }, [sellerToken, sellerData]);
-
-  // Handle loginå
-  const handleLoginSuccess = (token, data) => {
-    setSellerToken(token);
-    setSellerData(data);
-    localStorage.setItem("sellerToken", token);
-    localStorage.setItem("sellerData", JSON.stringify(data));
-  };
 
   // Handle logout
   const handleLogout = () => {
@@ -34,33 +28,16 @@ const Seller = () => {
     setSellerData(null);
     localStorage.removeItem("sellerToken");
     localStorage.removeItem("sellerData");
+    navigate("/seller/login");
   };
 
-  // Handle register success (go back to login page)
-  const handleRegisterSuccess = () => {
-    setShowRegister(false);
-  };
-
+  // Auth Guard: If no token, redirect to login
   if (!sellerToken) {
-    return showRegister ? (
-      <Register
-        onRegisterSuccess={handleRegisterSuccess}
-        onSwitchToLogin={() => setShowRegister(false)}
-      />
-    ) : (
-      <Login
-        onLoginSuccess={handleLoginSuccess}
-        onSwitchToRegister={() => setShowRegister(true)}
-      />
-    );
+    return <Navigate to="/seller/login" state={{ from: location }} replace />;
   }
 
   return (
-    <Dashboard
-      sellerToken={sellerToken}
-      sellerData={sellerData}
-      onLogout={handleLogout}
-    />
+    <Outlet context={{ sellerToken, sellerData, handleLogout }} />
   );
 };
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaArrowLeft, FaUpload, FaCheck, FaStar } from 'react-icons/fa';
 import './CreateBrandPage.css';
 
-const CreateBrandPage = ({ sellerToken, onBackToDashboard, onBrandCreated }) => {
+const CreateBrandPage = () => {
+  const navigate = useNavigate();
+  const { sellerToken } = useOutletContext();
   const [newBrand, setNewBrand] = useState({
     name: '',
     logo: '',
@@ -92,7 +95,8 @@ const CreateBrandPage = ({ sellerToken, onBackToDashboard, onBrandCreated }) => 
       if (successMsg) successMsg.classList.add('show');
 
       setTimeout(() => {
-        onBrandCreated();
+        // Navigate to add product page after creating a brand (common workflow)
+        navigate('/seller/add-product');
       }, 1500);
 
     } catch (error) {
@@ -119,7 +123,7 @@ const CreateBrandPage = ({ sellerToken, onBackToDashboard, onBrandCreated }) => 
       <div className="cb-container">
         {/* Header */}
         <header className="cb-header">
-          <button className="cb-back-btn" onClick={onBackToDashboard}>
+          <button className="cb-back-btn" onClick={() => navigate('/seller')}>
             <FaArrowLeft /> Back
           </button>
           <div className="cb-title-section">
@@ -206,7 +210,7 @@ const CreateBrandPage = ({ sellerToken, onBackToDashboard, onBrandCreated }) => 
             {errors.submit && <div className="cb-submit-error">{errors.submit}</div>}
 
             <div className="cb-actions">
-              <button type="button" onClick={onBackToDashboard} className="cb-btn-secondary">
+              <button type="button" onClick={() => navigate('/seller')} className="cb-btn-secondary">
                 Cancel
               </button>
               <button type="submit" className="cb-btn-primary" disabled={loading}>

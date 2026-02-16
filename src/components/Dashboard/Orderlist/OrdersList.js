@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaArrowLeft, FaFilter, FaBoxOpen, FaTimes } from 'react-icons/fa';
 import './OrdersList.css';
 
-const OrdersList = ({ sellerToken, onBackToDashboard }) => {
+const OrdersList = () => {
+  const navigate = useNavigate();
+  const { sellerToken } = useOutletContext();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -159,7 +162,7 @@ const OrdersList = ({ sellerToken, onBackToDashboard }) => {
         {/* Header */}
         <header className="ol-header">
           <div className="ol-header-top">
-            <button className="ol-back-btn" onClick={onBackToDashboard}>
+            <button className="ol-back-btn" onClick={() => navigate('/seller')}>
               <FaArrowLeft /> Back
             </button>
             <div className="ol-actions">

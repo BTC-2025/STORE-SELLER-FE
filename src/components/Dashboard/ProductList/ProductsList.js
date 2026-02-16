@@ -1,9 +1,12 @@
 // ProductsList.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { FaArrowLeft, FaEdit, FaTrash, FaEye, FaTimes, FaSave, FaImage } from 'react-icons/fa';
 import './ProductsList.css';
 
-const ProductsList = ({ sellerToken, onBackToDashboard }) => {
+const ProductsList = () => {
+  const navigate = useNavigate();
+  const { sellerToken } = useOutletContext();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -187,7 +190,7 @@ const ProductsList = ({ sellerToken, onBackToDashboard }) => {
     return (
       <div className="seller-products-error">
         <p>Error: {error}</p>
-        <button onClick={onBackToDashboard}>Back to Dashboard</button>
+        <button onClick={() => navigate('/seller')}>Back to Dashboard</button>
       </div>
     );
   }
@@ -195,7 +198,7 @@ const ProductsList = ({ sellerToken, onBackToDashboard }) => {
   return (
     <div className="seller-products-container">
       <div className="seller-products-header">
-        <button className="seller-btn-back" onClick={onBackToDashboard}>
+        <button className="seller-btn-back" onClick={() => navigate('/seller')}>
           <FaArrowLeft /> Back to Dashboard
         </button>
         <h2>Your Products</h2>

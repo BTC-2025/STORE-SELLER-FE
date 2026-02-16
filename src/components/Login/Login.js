@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
+const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -39,7 +41,12 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
       const data = await response.json();
 
       if (response.ok) {
-        onLoginSuccess(data.token, data.seller);
+        // Save to localStorage
+        localStorage.setItem("sellerToken", data.token);
+        localStorage.setItem("sellerData", JSON.stringify(data.seller));
+
+        // Navigate to dashboard
+        navigate('/seller');
       } else {
         setError(data.message || 'Login failed. Please try again.');
       }
@@ -54,9 +61,9 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
     <div className="login-container">
       <form className="login-form" onSubmit={handleSubmit}>
         <h2>Seller Login</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -69,7 +76,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
             required
           />
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <input
@@ -81,35 +88,35 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
             placeholder="Enter your password"
             required
           />
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="password-toggle"
             onClick={togglePasswordVisibility}
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
-        
-        <button 
-          type="submit" 
-          className="btn-login" 
+
+        <button
+          type="submit"
+          className="btn-login"
           disabled={loading}
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        
+
         <div className="divider">
           <span>OR</span>
         </div>
-        
-        <button 
-          type="button" 
-          className="btns-switch" 
-          onClick={onSwitchToRegister}
+
+        <button
+          type="button"
+          className="btns-switch"
+          onClick={() => navigate('/seller/register')}
         >
           Create a new seller account
         </button>
-        
+
         <div className="login-footer">
           <p>Need help? <a href="#support">Contact support</a></p>
         </div>

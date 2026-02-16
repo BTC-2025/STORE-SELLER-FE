@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaCheck, FaLock, 
-  FaUser, FaBuilding, FaEnvelope, FaPhone, FaMapMarker, FaCreditCard, 
-  FaUniversity, FaFileInvoice, FaIdCard, FaCity, FaMapMarkedAlt, 
-  FaGlobe, FaMapPin, FaWallet 
+import { useNavigate } from 'react-router-dom';
+import {
+  FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaCheck, FaLock,
+  FaUser, FaBuilding, FaEnvelope, FaPhone, FaMapMarker, FaCreditCard,
+  FaUniversity, FaFileInvoice, FaIdCard, FaCity, FaMapMarkedAlt,
+  FaGlobe, FaMapPin, FaWallet
 } from 'react-icons/fa';
 import './Register.css';
 
-const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Step 1: Basic Information
@@ -17,7 +19,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
     password: '',
     confirmPassword: '',
     businessName: '',
-    
+
     // Step 2: Business Details
     businessType: 'individual',
     gstNumber: '',
@@ -32,7 +34,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
     ifscCode: '',
     upiId: ''
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
@@ -58,16 +60,16 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
     if (password.length === 0) return '';
     if (password.length < 6) return 'weak';
     if (password.length < 8) return 'medium';
-    
+
     // Check for complexity
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
+
     const complexityScore = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar]
       .filter(Boolean).length;
-    
+
     if (complexityScore >= 3 && password.length >= 8) return 'strong';
     if (complexityScore >= 2 && password.length >= 6) return 'medium';
     return 'weak';
@@ -80,42 +82,42 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
       setError('Please enter your full name');
       return false;
     }
-    
+
     if (!formData.email.trim()) {
       setError('Please enter your email address');
       return false;
     }
-    
+
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
       setError('Please enter a valid email address');
       return false;
     }
-    
+
     if (!formData.phone.trim()) {
       setError('Please enter your phone number');
       return false;
     }
-    
+
     if (!formData.businessName.trim()) {
       setError('Please enter your business name');
       return false;
     }
-    
+
     if (!formData.password) {
       setError('Please create a password');
       return false;
     }
-    
+
     if (passwordStrength === 'weak') {
       setError('Please choose a stronger password');
       return false;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
-    
+
     setError('');
     return true;
   };
@@ -149,7 +151,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
       if (response.ok) {
         setSuccess('Registration successful! Please login to continue.');
         setTimeout(() => {
-          onRegisterSuccess();
+          navigate('/seller/login');
         }, 2000);
       } else {
         setError(data.message || 'Registration failed. Please try again.');
@@ -168,10 +170,10 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         <h2>Create Seller Account</h2>
         <p>Join thousands of sellers growing their business with us</p>
       </div>
-      
+
       <div className="progress-container">
         <div className="progress-bar">
-          <div className="progress-fill" style={{width: '33%'}}></div>
+          <div className="progress-fill" style={{ width: '33%' }}></div>
         </div>
         <div className="progress-steps">
           <span className="progress-step active">1</span>
@@ -182,9 +184,9 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           <span className="progress-label">Business Details</span>
         </div>
       </div>
-      
+
       {error && <div className="error-message">{error}</div>}
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaUser />
@@ -199,7 +201,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           required
         />
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaBuilding />
@@ -214,7 +216,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           required
         />
       </div>
-      
+
       <div className="form-row">
         <div className="input-group">
           <div className="input-icon">
@@ -230,7 +232,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             required
           />
         </div>
-        
+
         <div className="input-group">
           <div className="input-icon">
             <FaPhone />
@@ -246,7 +248,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           />
         </div>
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaLock />
@@ -260,14 +262,14 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           placeholder="Password"
           required
         />
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="password-toggle"
           onClick={() => togglePasswordVisibility('password')}
         >
           {showPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
-        
+
         {formData.password && (
           <>
             <div className="password-strength">
@@ -293,7 +295,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           </>
         )}
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaLock />
@@ -307,29 +309,29 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           placeholder="Confirm Password"
           required
         />
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="password-toggle"
           onClick={() => togglePasswordVisibility('confirm')}
         >
           {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
       </div>
-      
+
       <div className="form-actions">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="btn-next"
           onClick={handleNextStep}
         >
           Continue <FaArrowRight />
         </button>
-        
+
         <div className="auth-redirect">
-          Already have an account? <button type="button" onClick={onSwitchToLogin}>Sign In</button>
+          Already have an account? <button type="button" onClick={() => navigate('/seller/login')}>Sign In</button>
         </div>
       </div>
-      
+
       <div className="terms-notice">
         By continuing, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
       </div>
@@ -343,10 +345,10 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         <h2>Business Details</h2>
         <p>Complete your seller profile with business information</p>
       </div>
-      
+
       <div className="progress-container">
         <div className="progress-bar">
-          <div className="progress-fill" style={{width: '100%'}}></div>
+          <div className="progress-fill" style={{ width: '100%' }}></div>
         </div>
         <div className="progress-steps">
           <span className="progress-step completed">1</span>
@@ -357,10 +359,10 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           <span className="progress-label active">Business Details</span>
         </div>
       </div>
-      
+
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaBuilding />
@@ -379,7 +381,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           <option value="other">Other</option>
         </select>
       </div>
-      
+
       <div className="form-row">
         <div className="input-group">
           <div className="input-icon">
@@ -394,7 +396,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             placeholder="GST Number (Optional)"
           />
         </div>
-        
+
         <div className="input-group">
           <div className="input-icon">
             <FaIdCard />
@@ -409,7 +411,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           />
         </div>
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaMapMarker />
@@ -424,7 +426,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           required
         />
       </div>
-      
+
       <div className="form-row">
         <div className="input-group">
           <div className="input-icon">
@@ -440,7 +442,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             required
           />
         </div>
-        
+
         <div className="input-group">
           <div className="input-icon">
             <FaMapMarkedAlt />
@@ -456,7 +458,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           />
         </div>
       </div>
-      
+
       <div className="form-row">
         <div className="input-group">
           <div className="input-icon">
@@ -472,7 +474,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             required
           />
         </div>
-        
+
         <div className="input-group">
           <div className="input-icon">
             <FaMapPin />
@@ -488,11 +490,11 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           />
         </div>
       </div>
-      
+
       <div className="section-divider">
         <span>Bank Account Details</span>
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaCreditCard />
@@ -507,7 +509,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           required
         />
       </div>
-      
+
       <div className="form-row">
         <div className="input-group">
           <div className="input-icon">
@@ -523,7 +525,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             required
           />
         </div>
-        
+
         <div className="input-group">
           <div className="input-icon">
             <FaUniversity />
@@ -539,7 +541,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           />
         </div>
       </div>
-      
+
       <div className="input-group">
         <div className="input-icon">
           <FaWallet />
@@ -553,25 +555,25 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
           placeholder="UPI ID (Optional)"
         />
       </div>
-      
+
       <div className="form-actions">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="btn-previous"
           onClick={handlePreviousStep}
         >
           <FaArrowLeft /> Back
         </button>
-        
-        <button 
-          type="submit" 
-          className="btn-register" 
+
+        <button
+          type="submit"
+          className="btn-register"
           disabled={loading}
         >
           {loading ? 'Creating Account...' : 'Complete Registration'}
         </button>
       </div>
-      
+
       <div className="terms-notice">
         By registering, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
       </div>
