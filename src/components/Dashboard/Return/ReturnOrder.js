@@ -29,41 +29,86 @@ const ReturnOrder = () => {
   const [complaintType, setComplaintType] = useState("Fraud");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [sellerComment, setSellerComment] = useState("");
 
   useEffect(() => {
-    if (!sellerData || !sellerData.id) {
-      console.error("Seller ID not found");
-      setLoading(false);
-      return;
+    if (sellerData?.id) {
+      fetchReturns();
     }
-
-    const fetchReturns = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/api/return/sellerid/${sellerData.id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch return items");
-        }
-
-        const data = await response.json();
-        setReturnItems(data.returnItems || []);
-      } catch (err) {
-        console.error("Error fetching return items:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReturns();
   }, [sellerData]);
+
+  const fetchReturns = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/return/sellerid/${sellerData.id}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch return items");
+      }
+
+      const data = await response.json();
+      setReturnItems(data.returnItems || []);
+    } catch (err) {
+      console.error("Error fetching return items:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRaiseComplaint = (item) => {
     setSelectedItem(item);
     setComplaintType("Fraud");
     setDescription("");
     setShowComplaintForm(true);
+  };
+
+  const handleOpenStatusModal = (item, status) => {
+    setSelectedItem(item);
+    setNewStatus(status);
+    setSellerComment("");
+    setShowStatusModal(true);
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedItem) return;
+    if (newStatus === "Rejected" && !sellerComment) {
+      alert("Please provide a reason for rejection.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/api/return/update/${selectedItem.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            sellerComment: sellerComment
+          }),
+        }
+      );
+
+      if (response.ok) {
+        alert(`Return status updated to ${newStatus}`);
+        setShowStatusModal(false);
+        fetchReturns();
+      } else {
+        const result = await response.json();
+        alert(result.error || "Failed to update status");
+      }
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert("Failed to update status");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const submitComplaint = async () => {
@@ -171,7 +216,9 @@ const ReturnOrder = () => {
                     <th>Return ID</th>
                     <th>Product</th>
                     <th>Reason</th>
-                    <th>Refund Amount</th>
+                    <th>Price</th>
+                    <th>GST (18%)</th>
+                    <th>Final Amount</th>
                     <th>Status</th>
                     <th>Date</th>
                     <th className="text-right">Actions</th>
@@ -193,6 +240,12 @@ const ReturnOrder = () => {
                       <td className="font-medium">
                         {item.orderItem ? formatCurrency(item.orderItem.totalPrice) : 'N/A'}
                       </td>
+                      <td className="text-gray-600">
+                        {item.orderItem ? formatCurrency(item.orderItem.totalPrice * 0.18) : 'N/A'}
+                      </td>
+                      <td className="font-bold text-indigo-700">
+                        {item.orderItem ? formatCurrency(item.orderItem.totalPrice * 1.18) : 'N/A'}
+                      </td>
                       <td>{getStatusBadge(item.status)}</td>
                       <td className="ro-date-cell">
                         {new Date(item.createdAt).toLocaleDateString("en-IN", {
@@ -202,13 +255,33 @@ const ReturnOrder = () => {
                         })}
                       </td>
                       <td className="text-right">
-                        <button
-                          className="ro-btn-complaint"
-                          onClick={() => handleRaiseComplaint(item)}
-                          title="Raise Complaint"
-                        >
-                          <FaExclamationCircle /> Dispute
-                        </button>
+                        <div className="ro-actions-group">
+                          {item.status === "Pending" && (
+                            <>
+                              <button
+                                className="ro-btn-approve"
+                                onClick={() => handleOpenStatusModal(item, "Approved")}
+                                title="Approve Return"
+                              >
+                                <FaCheckCircle /> Approve
+                              </button>
+                              <button
+                                className="ro-btn-reject"
+                                onClick={() => handleOpenStatusModal(item, "Rejected")}
+                                title="Reject Return"
+                              >
+                                <FaTimesCircle /> Reject
+                              </button>
+                            </>
+                          )}
+                          <button
+                            className="ro-btn-complaint"
+                            onClick={() => handleRaiseComplaint(item)}
+                            title="Raise Complaint"
+                          >
+                            <FaExclamationCircle /> Dispute
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -218,6 +291,58 @@ const ReturnOrder = () => {
           )}
         </div>
       </div>
+
+      {/* Status Update Modal */}
+      {showStatusModal && (
+        <div className="ro-modal-overlay">
+          <div className="ro-modal">
+            <div className="ro-modal-header">
+              <h3>{newStatus} Return</h3>
+              <button className="ro-modal-close" onClick={() => setShowStatusModal(false)}>×</button>
+            </div>
+            <div className="ro-modal-body">
+              <p>Are you sure you want to <strong>{newStatus.toLowerCase()}</strong> this return request?</p>
+              {newStatus === "Rejected" && (
+                <div className="ro-form-group mt-3">
+                  <label>Reason for Rejection (This will be visible to Admin)</label>
+                  <textarea
+                    rows="4"
+                    value={sellerComment}
+                    onChange={(e) => setSellerComment(e.target.value)}
+                    placeholder="Enter rejection reason..."
+                    className="ro-textarea"
+                    required
+                  />
+                </div>
+              )}
+              {newStatus === "Approved" && (
+                <div className="ro-form-group mt-3">
+                  <label>Comment (Optional)</label>
+                  <textarea
+                    rows="4"
+                    value={sellerComment}
+                    onChange={(e) => setSellerComment(e.target.value)}
+                    placeholder="Enter any comments..."
+                    className="ro-textarea"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="ro-modal-footer">
+              <button className="ro-btn-secondary" onClick={() => setShowStatusModal(false)}>
+                Cancel
+              </button>
+              <button
+                className={`ro-btn-${newStatus === "Approved" ? "primary" : "danger"}`}
+                onClick={handleUpdateStatus}
+                disabled={submitting || (newStatus === "Rejected" && !sellerComment)}
+              >
+                {submitting ? "Updating..." : `Confirm ${newStatus}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Complaint Modal */}
       {showComplaintForm && (

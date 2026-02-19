@@ -49,7 +49,7 @@ const OrdersList = () => {
     if (filterStatus === 'All') {
       setFilteredOrders(orders);
     } else {
-      setFilteredOrders(orders.filter(item => item.order?.status === filterStatus));
+      setFilteredOrders(orders.filter(item => item.status === filterStatus));
     }
   }, [filterStatus, orders]);
 
@@ -144,7 +144,11 @@ const OrdersList = () => {
       case 'processing': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'approved': return 'bg-green-600 text-white border-green-700';
+      case 'rejected': return 'bg-red-600 text-white border-red-700';
+      case 'completed': return 'bg-blue-600 text-white border-blue-700';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -203,7 +207,9 @@ const OrdersList = () => {
                     <th>Order ID</th>
                     <th>Customer</th>
                     <th>Product</th>
-                    <th>Price</th>
+                    <th>Item Price</th>
+                    <th>GST (18%)</th>
+                    <th>Final Amount</th>
                     <th>Status</th>
                     <th>Date</th>
                     <th className="text-right">Actions</th>
@@ -228,10 +234,21 @@ const OrdersList = () => {
                         </div>
                       </td>
                       <td className="font-medium">{formatCurrency(item.totalPrice)}</td>
+                      <td className="text-gray-600 font-medium">{formatCurrency(item.totalPrice * 0.18)}</td>
+                      <td className="font-bold text-indigo-700">{formatCurrency(item.totalPrice * 1.18)}</td>
                       <td>
-                        <span className={`ol-status-badge ${getStatusColor(item.order?.status)}`}>
-                          {item.order?.status || 'Pending'}
-                        </span>
+                        <div className="ol-status-container">
+                          <span className={`ol-status-badge ${getStatusColor(item.status)}`}>
+                            {item.status || 'Pending'}
+                          </span>
+                          {item.returns && item.returns.length > 0 && (
+                            <div className="ol-return-badge-wrapper mt-1">
+                              <span className={`ol-status-badge text-xs ${getStatusColor(item.returns[item.returns.length - 1].status)}`}>
+                                Return: {item.returns[item.returns.length - 1].status}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="ol-date-cell">{formatDate(item.createdAt)}</td>
                       <td className="text-right">
@@ -301,12 +318,20 @@ const OrdersList = () => {
                   <p>{selectedOrder.quantity}</p>
                 </div>
                 <div className="ol-detail-item">
-                  <label>Unit Price</label>
-                  <p>{formatCurrency(selectedOrder.price)}</p>
+                  <label>Subtotal (Excl. Tax)</label>
+                  <p className="font-medium text-gray-700">{formatCurrency(selectedOrder.totalPrice)}</p>
                 </div>
                 <div className="ol-detail-item">
-                  <label>Total Amount</label>
-                  <p className="font-bold text-indigo-600">{formatCurrency(selectedOrder.totalPrice)}</p>
+                  <label>GST (18%)</label>
+                  <p className="font-medium text-gray-600">{formatCurrency(selectedOrder.totalPrice * 0.18)}</p>
+                </div>
+                <div className="ol-detail-item">
+                  <label>Item Net Total</label>
+                  <p className="font-bold text-indigo-600">{formatCurrency(selectedOrder.totalPrice * 1.18)}</p>
+                </div>
+                <div className="ol-detail-item">
+                  <label>Order Final Amount (incl. all fees)</label>
+                  <p className="font-bold text-gray-900">{formatCurrency(selectedOrder.order?.finalAmount || 0)}</p>
                 </div>
                 <div className="ol-detail-item">
                   <label>Order Date</label>

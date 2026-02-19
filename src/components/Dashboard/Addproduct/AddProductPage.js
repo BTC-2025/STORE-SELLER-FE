@@ -24,7 +24,8 @@ const AddProductPage = () => {
     isFeatured: false,
     createdBy: '',
     tagline: '', // Added tagline field
-    discount: 0
+    discount: 0,
+    gstPercent: 18
   });
 
   const getSellerIdFromToken = useCallback(() => {
@@ -66,9 +67,38 @@ const AddProductPage = () => {
 
 
 
+  const [categories, setCategories] = useState([]);
+  const [availableSubcategories, setAvailableSubcategories] = useState([]);
+
   useEffect(() => {
     fetchBrands();
+    fetchCategories();
   }, [fetchBrands]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/category`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (newProduct.category) {
+      const selectedCat = categories.find(c => c.name === newProduct.category);
+      if (selectedCat && selectedCat.subcategories) {
+        setAvailableSubcategories(selectedCat.subcategories);
+      } else {
+        setAvailableSubcategories([]);
+      }
+    } else {
+      setAvailableSubcategories([]);
+    }
+  }, [newProduct.category, categories]);
 
 
 
@@ -291,24 +321,42 @@ const AddProductPage = () => {
 
                   <div className="ap-form-group">
                     <label>Category *</label>
-                    <input
-                      type="text"
-                      className="ap-input"
-                      placeholder="e.g. Electronics"
+                    <select
+                      className="ap-select"
                       value={newProduct.category}
                       onChange={(e) => handleChange('category', e.target.value)}
                       required
-                    />
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="ap-form-group">
                     <label>Subcategory</label>
-                    <input
-                      type="text"
-                      className="ap-input"
-                      placeholder="e.g. Audio"
+                    <select
+                      className="ap-select"
                       value={newProduct.subcategory}
                       onChange={(e) => handleChange('subcategory', e.target.value)}
+                      disabled={!newProduct.category}
+                    >
+                      <option value="">Select Subcategory</option>
+                      {availableSubcategories.map(sub => (
+                        <option key={sub.id} value={sub.name}>{sub.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="ap-form-group">
+                    <label>GST (%)</label>
+                    <input
+                      type="number"
+                      className="ap-input"
+                      placeholder="e.g. 18"
+                      value={newProduct.gstPercent}
+                      onChange={(e) => handleChange('gstPercent', e.target.value)}
                     />
                   </div>
                 </div>
